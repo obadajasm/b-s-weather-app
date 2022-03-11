@@ -2,20 +2,20 @@
   <div class="home">
     <div v-if="currentWeather">
       <p>
-        {{ currentWeather.name }}
+        {{ city.name }}
       </p>
-      {{ currentWeather.counrtyName }}
+      <p>
+        {{ city.countryName }}
+      </p>
+      <img :src="icon" />
+      <p>{{ currentWeather.main.temp }}</p>
+      <p>{{ currentWeather.weather[0].main }}</p>
     </div>
-    <img :src="icon" />
-    <p>{{ currentWeather.main.temp }}</p>
-    <p>{{ currentWeather.weather[0].main }}</p>
   </div>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
-// @ is an alias to /src
-// import HelloWorld from "@/components/HelloWorld.vue";
 
 export default {
   data() {
@@ -24,12 +24,15 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("Weather", ["currentWeather"]),
+    ...mapGetters("Weather", ["currentWeather", "city"]),
   },
   watch: {
     currentWeather: {
-      handler(newV) {
-        this.icon = `http://openweathermap.org/img/wn/${newV.weather[0].icon}@2x.png`;
+      handler() {
+        if (!this.currentWeather) {
+          return;
+        }
+        this.icon = `http://openweathermap.org/img/wn/${this.currentWeather.weather[0].icon}@2x.png`;
       },
       immediate: true,
     },

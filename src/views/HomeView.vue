@@ -1,14 +1,10 @@
 <template>
   <div>
-    <div>
+    <div class="input-search">
       <div class="form">
-        <form @submit.prevent="submitHandler">
-          <input
-            class="search-input"
-            v-model="cityName"
-            type="search"
-            placeholder="Search..."
-          />
+        <form @submit.prevent="submitHandler" class="input-search">
+          <input v-model="cityName" type="search" placeholder="Search..." />
+
           <button type="submit">Search</button>
         </form>
       </div>
@@ -17,36 +13,83 @@
         <span class="handle"></span>
       </span>
     </div>
-    <nav>
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </nav>
-    <router-view />
+    <div style="margin: 30px; padding: 10px">
+      <nav>
+        <router-link
+          :class="{ 'selected-tab': this.$route.path == '/' }"
+          :disabled="canNavigate"
+          to="/"
+          >CURRENT</router-link
+        >
+        <router-link
+          :class="{ 'selected-tab': this.$route.path == '/forecast' }"
+          :disabled="canNavigate"
+          to="/forecast"
+        >
+          SEVEN DAYS FORECAST</router-link
+        >
+      </nav>
+    </div>
+    <router-view :key="$router.route" />
   </div>
 </template>
 
 <script>
 import { mapActions } from "vuex";
+import { debounce } from "@/helpers";
 export default {
   data() {
     return {
       cityName: "",
+      canNavigate: false,
+      showCurrent: true,
     };
   },
+  watch: {
+    cityName: debounce(function () {
+      if (this.cityName.length > 2) {
+        this.submitHandler();
+      }
+    }, 500),
+  },
   methods: {
-    ...mapActions("Weather", ["getCurrentWeatherByCityName"]),
+    ...mapActions("Weather", [
+      "getCurrentWeatherByCityName",
+      "getSevenDaysForecastByCityName",
+    ]),
     async submitHandler() {
-      this.getCurrentWeatherByCityName(this.cityName);
+      this.canNavigate = true;
+      const res = await this.getCurrentWeatherByCityName(this.cityName);
+      this.getSevenDaysForecastByCityName(res.coord);
+    },
+    debounce(func, delay) {
+      let debounceTimer;
+      return function () {
+        const context = this;
+        const args = arguments;
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func.apply(context, args), delay);
+      };
     },
   },
 };
 </script>
 
 <style scoped>
-.form {
+.input-search {
   display: flex;
-  justify-content: justify-center;
   align-items: center;
+  justify-content: center;
+}
+.selected-tab {
+  padding: 10px;
+  border: solid 1px #c0c0c0;
+  border-radius: 5px;
+  margin: 0px 10px;
+}
+a {
+  color: #000;
+  text-decoration: none;
 }
 form {
   color: #555;

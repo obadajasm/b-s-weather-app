@@ -1,9 +1,9 @@
 //we are `proxing` the `metaweather` to avoid the CROS
 const baseUrl = "https://api.openweathermap.org/data/2.5/";
-const APPID = "2858360d69efa635b0cff2286c2ddf7f";
+const APPID = "53f20b1a592186db6edef1438ba8e759";
 const currentWeather = (city) => `${baseUrl}/weather?q=${city}&appid=${APPID}`;
-const sevenDaysForecast = (city) =>
-  `${baseUrl}/forecast?q=${city}&appid=${APPID}`;
+const sevenDaysForecast = (lat, lon) =>
+  `${baseUrl}onecall?lat=${lat}&lon=${lon}&appid=${APPID}`;
 
 export default class WeatherService {
   static async getCurrentWeatherByCityName(cityName) {
@@ -19,9 +19,9 @@ export default class WeatherService {
       throw error;
     }
   }
-  static async getSevenDaysForecastByCityName(cityName) {
+  static async getSevenDaysForecastByCityName(lat, lon) {
     try {
-      const rawData = await fetch(sevenDaysForecast(cityName), {
+      const rawData = await fetch(sevenDaysForecast(lat, lon), {
         method: "GET",
       });
 

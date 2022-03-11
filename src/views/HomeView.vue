@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import WeatherService from "@/service/WeatherService";
+import { mapActions } from "vuex";
 export default {
   data() {
     return {
@@ -34,9 +34,9 @@ export default {
     };
   },
   methods: {
+    ...mapActions("Weather", ["getCurrentWeatherByCityName"]),
     async submitHandler() {
-      const cityInfo = await WeatherService.getCurrentWeather(this.cityName);
-      this.$emit("cityInfo", cityInfo);
+      this.getCurrentWeatherByCityName(this.cityName);
     },
   },
 };

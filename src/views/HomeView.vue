@@ -1,28 +1,21 @@
 <template>
   <div>
-    <div class="input-search">
-      <div class="form">
-        <form @submit.prevent="submitHandler" class="input-search">
-          <input v-model="cityName" type="search" placeholder="Search..." />
-
-          <button type="submit">Search</button>
-        </form>
-      </div>
-      <span class="search-icon">
-        <span class="glass"></span>
-        <span class="handle"></span>
-      </span>
+    <div :class="$style.inputSearch">
+      <form @submit.prevent="submitHandler" :class="$style.inputSearch">
+        <input v-model="cityName" type="search" placeholder="Search..." />
+        <button type="submit">Search</button>
+      </form>
     </div>
-    <div style="margin: 30px; padding: 10px">
+    <div style="margin: 30px 0px; padding: 10px">
       <nav>
         <router-link
-          :class="{ 'selected-tab': this.$route.path == '/' }"
+          :class="{ [$style.selectedTab]: this.$route.path == '/' }"
           :disabled="canNavigate"
           to="/"
           >CURRENT</router-link
         >
         <router-link
-          :class="{ 'selected-tab': this.$route.path == '/forecast' }"
+          :class="{ [$style.selectedTab]: this.$route.path == '/forecast' }"
           :disabled="canNavigate"
           to="/forecast"
         >
@@ -30,12 +23,15 @@
         >
       </nav>
     </div>
-    <router-view :key="$router.route" />
+    <p v-if="errorMsg">
+      {{ errorMsg }}
+    </p>
+    <router-view v-else :key="$router.route" />
   </div>
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import { debounce } from "@/helpers";
 export default {
   data() {
@@ -45,6 +41,10 @@ export default {
       showCurrent: true,
     };
   },
+  computed: {
+    ...mapGetters("Weather", ["errorMsg"]),
+  },
+
   watch: {
     cityName: debounce(function () {
       if (this.cityName.length > 2) {
@@ -60,7 +60,9 @@ export default {
     async submitHandler() {
       this.canNavigate = true;
       const res = await this.getCurrentWeatherByCityName(this.cityName);
-      this.getSevenDaysForecastByCityName(res.coord);
+      if (res) {
+        this.getSevenDaysForecastByCityName(res.coord);
+      }
     },
     debounce(func, delay) {
       let debounceTimer;
@@ -75,17 +77,17 @@ export default {
 };
 </script>
 
-<style scoped>
-.input-search {
+<style scoped module lang="less">
+@import "@/assets/styles.less";
+
+.inputSearch {
   display: flex;
-  align-items: center;
   justify-content: center;
 }
-.selected-tab {
+.selectedTab {
   padding: 10px;
-  border: solid 1px #c0c0c0;
-  border-radius: 5px;
   margin: 0px 10px;
+  .bordered(solid);
 }
 a {
   color: #000;
@@ -95,8 +97,7 @@ form {
   color: #555;
   display: flex;
   padding: 2px;
-  border: 1px solid rgb(241, 239, 239);
-  border-radius: 5px;
+  .bordered(solid);
 }
 input[type="search"] {
   border: none;
@@ -132,8 +133,8 @@ button[type="submit"]:hover {
 }
 button[type="submit"]:focus,
 input[type="search"]:focus {
-  box-shadow: 0 0 3px 0 #1183d6;
-  border-color: #1183d6;
+  box-shadow: 0 0 3px 0 #b2b4b6;
+  border-color: #b2b4b6;
   outline: none;
 }
 </style>

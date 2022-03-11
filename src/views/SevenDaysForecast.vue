@@ -7,19 +7,13 @@
       <p>
         {{ city.countryName }}
       </p>
-      <div class="container">
+      <div :class="$style.container">
         <div
           v-for="item in handleForecastList(forecast.daily)"
-          :key="item.dt_txt"
-          class="item"
+          :key="item.dt"
+          :class="$style.items"
         >
-          <div>
-            <img :src="handleIcon(item.weather[0].icon)" />
-            <p>{{ item.weather[0].main }}</p>
-            <p>{{ item.temp.max }}</p>
-            <p>{{ item.weather[0].description }}</p>
-            <p>{{ handleDate(item.dt) }}</p>
-          </div>
+          <WeatherItem :item="item" />
         </div>
       </div>
     </div>
@@ -28,18 +22,16 @@
 
 <script>
 import { mapGetters } from "vuex";
+import WeatherItem from "@/components/WeatherItem.vue";
 
 export default {
   computed: {
     ...mapGetters("Weather", ["forecast", "city"]),
   },
+  components: {
+    WeatherItem,
+  },
   methods: {
-    handleIcon(iconName) {
-      return `http://openweathermap.org/img/wn/${iconName}@2x.png`;
-    },
-    handleDate(date) {
-      return new Date(date * 1000).toLocaleString().split(",")[0];
-    },
     handleForecastList(list) {
       return list.slice(0, 7);
     },
@@ -47,17 +39,18 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped module lang="less">
+@import "@/assets/styles.less";
 .container {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
 }
-.item {
+.items {
   margin: 5px;
   padding: 30px;
-  border: 1px dotted rgb(238, 235, 235);
+  .bordered(dotted);
 }
 table {
   border-collapse: collapse;

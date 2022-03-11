@@ -1,10 +1,10 @@
 export function debounce(fn, delay) {
-  var timeoutID = null;
+  var timeout = null;
   return function () {
-    clearTimeout(timeoutID);
+    clearTimeout(timeout);
     var args = arguments;
     var that = this;
-    timeoutID = setTimeout(function () {
+    timeout = setTimeout(function () {
       fn.apply(that, args);
     }, delay);
   };

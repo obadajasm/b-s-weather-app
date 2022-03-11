@@ -6,6 +6,7 @@ export default {
     currentWeather: null,
     forecast: null,
     city: null,
+    errorMsg: null,
   },
   getters: {
     currentWeather(state) {
@@ -16,6 +17,9 @@ export default {
     },
     city(state) {
       return state.city;
+    },
+    errorMsg(state) {
+      return state.errorMsg;
     },
   },
   mutations: {
@@ -28,14 +32,23 @@ export default {
     setCity(state, value) {
       state.city = value;
     },
+    setErrorMsg(state, value) {
+      state.errorMsg = value;
+    },
   },
   actions: {
     async getCurrentWeatherByCityName({ commit }, cityName) {
       try {
-        // const { getCountry } = require("about-countries");
         const currentWeather = await WeatherService.getCurrentWeatherByCityName(
           cityName
         );
+        if (currentWeather.cod != 200) {
+          commit(
+            "setErrorMsg",
+            currentWeather?.message ?? "Something went wrong"
+          );
+          return;
+        }
         let regionNames = new Intl.DisplayNames(["en"], { type: "region" });
         const counrtyName = regionNames.of(currentWeather.sys.country); // "
         currentWeather.counrtyName = counrtyName;
@@ -44,35 +57,24 @@ export default {
           name: currentWeather.name,
           countryName: counrtyName,
         });
+        commit("setErrorMsg", null);
         return currentWeather;
       } catch (error) {
         console.log(error);
+        commit("setErrorMsg", error);
         throw error;
       }
     },
     async getSevenDaysForecastByCityName({ commit }, { lat, lon }) {
       try {
-        // const { getCountry } = require("about-countries");
         const forecastData =
           await WeatherService.getSevenDaysForecastByCityName(lat, lon);
-        // for (const item of forecastData.daily) {
-        // }
-        // var dayname = new Date(value.dt * 1000).toLocaleDateString('en', { weekday:'long', });
-        // let regionNames = new Intl.DisplayNames(["en"], { type: "region" });
-        // const counrtyName = regionNames.of(forecastData.city.country);
-        // const takenDays = new Set();
-        // const filterdDaysWeather = forecastData.list.filter((e) => {
-        //   const date = e.dt_txt.split(" ")[0];
-        //   const hasIt = takenDays.has(date);
-        //   if (!hasIt) {
-        //     takenDays.add(date);
-        //   }
-        //   return !hasIt;
-        // });
-        // console.log("asdas", takenDays, filterdDaysWeather.length);
-        // forecastData.counrtyName = counrtyName;
+
         commit("setForecast", forecastData);
+        commit("setErrorMsg", null);
       } catch (error) {
+        commit("setErrorMsg", error);
+
         console.log(error);
         throw error;
       }
